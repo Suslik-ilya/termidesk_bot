@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Termidesk Cache Admin</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; background-color: #f4f4f9; }
+        .container { max-width: 1000px; margin: 0 auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        h1, h2 { color: #333; }
+        .entry { border: 1px solid #ddd; padding: 15px; margin-bottom: 15px; border-radius: 5px; background: #fafafa; }
+        .query { font-weight: bold; margin-bottom: 10px; font-size: 1.1em; color: #0056b3; }
+        .info { font-size: 0.9em; color: #666; margin-bottom: 10px; }
+        .answer-box { width: 100%; height: 100px; padding: 10px; border: 1px solid #ccc; border-radius: 4px; font-family: monospace; }
+        .actions { margin-top: 10px; }
+        button { padding: 8px 15px; margin-right: 10px; cursor: pointer; border: none; border-radius: 4px; font-weight: bold; }
+        .btn-approve { background-color: #28a745; color: white; }
+        .btn-edit { background-color: #007bff; color: white; }
+        .btn-delete { background-color: #dc3545; color: white; }
+        form { display: inline; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Админ-панель динамического кэша</h1>
+        
+        <h2>Кандидаты в кэш</h2>
+        {% if candidates %}
+            {% for c in candidates %}
+            <div class="entry">
+                <div class="query">Q: {{ c.query }}</div>
+                <div class="info">ID: {{ c.id }} | Target Version: {{ c.target_version or 'Any' }} | Rating: {{ c.rating }}</div>
+                <form action="/admin/edit" method="post">
+                    <input type="hidden" name="entry_id" value="{{ c.id }}">
+                    <textarea name="new_answer" class="answer-box">{{ c.answer }}</textarea>
+                    <div class="actions">
+                        <button type="submit" class="btn-edit">Сохранить изменения</button>
+                    </div>
+                </form>
+                <div class="actions">
+                    <form action="/admin/approve" method="post">
+                        <input type="hidden" name="entry_id" value="{{ c.id }}">
+                        <button type="submit" class="btn-approve">Одобрить</button>
+                    </form>
+                    <form action="/admin/delete" method="post">
+                        <input type="hidden" name="entry_id" value="{{ c.id }}">
+                        <button type="submit" class="btn-delete">Удалить</button>
+                    </form>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <p>No candidates available.</p>
+        {% endif %}
+
+        <h2>Одобренные ответы</h2>
+        {% if approved %}
+            {% for c in approved %}
+            <div class="entry">
+                <div class="query">Q: {{ c.query }}</div>
+                <div class="info">ID: {{ c.id }} | Target Version: {{ c.target_version or 'Any' }} | Rating: {{ c.rating }}</div>
+                <form action="/admin/edit" method="post">
+                    <input type="hidden" name="entry_id" value="{{ c.id }}">
+                    <textarea name="new_answer" class="answer-box">{{ c.answer }}</textarea>
+                    <div class="actions">
+                        <button type="submit" class="btn-edit">Сохранить изменения</button>
+                    </div>
+                </form>
+                <div class="actions">
+                    <form action="/admin/delete" method="post">
+                        <input type="hidden" name="entry_id" value="{{ c.id }}">
+                        <button type="submit" class="btn-delete">Удалить</button>
+                    </form>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <p>No approved entries.</p>
+        {% endif %}
+    </div>
+</body>
+</html>

@@ -1,0 +1,10 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: "termidesk_bot_backend"
+    metrics_path: "/metrics"
+    static_configs:
+      # Внутри Docker-сети FastAPI бэкенд доступен как bot:8000
+      - targets: ["bot:8000"]

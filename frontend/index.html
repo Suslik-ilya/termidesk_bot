@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Termidesk Обученный ИИ</title>
+    <!-- Marked.js для рендеринга Markdown -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        /* Корпоративная цветовая схема Termidesk (Бело-голубая база) */
+        :root {
+            --tdsk-blue: #0A66C2;
+            --tdsk-light-blue: #E8F3FF;
+            --tdsk-dark: #1F2937;
+            --tdsk-gray: #F3F4F6;
+            --text-dark: #374151;
+        }
+        
+        * {
+            box-sizing: border-box;
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--tdsk-gray);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .chat-container {
+            width: 100%;
+            max-width: 800px;
+            height: 90vh;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .chat-header {
+            background-color: var(--tdsk-blue);
+            color: #fff;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+            font-size: 1.25rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            letter-spacing: 0.5px;
+        }
+
+        .reset-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .reset-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            scroll-behavior: smooth;
+        }
+
+        .message {
+            max-width: 85%;
+            padding: 14px 18px;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            word-wrap: break-word;
+        }
+
+        /* Сообщения пользователя */
+        .message-user {
+            align-self: flex-end;
+            background-color: var(--tdsk-light-blue);
+            color: var(--tdsk-blue);
+            border-bottom-right-radius: 2px;
+            font-weight: 500;
+        }
+
+        /* Сообщения бота */
+        .message-bot {
+            align-self: flex-start;
+            background-color: #ffffff;
+            color: var(--text-dark);
+            border: 1px solid #e5e7eb;
+            border-bottom-left-radius: 2px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        /* Стилизация Markdown MarkdownV2 от ИИ */
+        .message-bot pre {
+            background: var(--tdsk-dark);
+            color: #fff;
+            padding: 12px;
+            border-radius: 6px;
+            overflow-x: auto;
+            margin: 10px 0;
+            font-size: 0.85rem;
+        }
+        .message-bot code {
+            background: #f1f5f9;
+            padding: 2px 5px;
+            border-radius: 4px;
+            font-family: monospace;
+            color: #d92d20;
+        }
+        .message-bot pre code {
+            background: transparent;
+            padding: 0;
+            color: #a78bfa;
+        }
+        .message-bot p { margin-bottom: 10px; }
+        .message-bot p:last-child { margin-bottom: 0; }
+        .message-bot ul, .message-bot ol { margin-left: 20px; margin-bottom: 10px; }
+        .message-bot a { color: var(--tdsk-blue); text-decoration: none; }
+        .message-bot a:hover { text-decoration: underline; }
+
+        /* Кнопки обратной связи (Фидбек) */
+        .feedback-actions {
+            margin-top: 12px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            border-top: 1px solid #f3f4f6;
+            padding-top: 10px;
+        }
+
+        .feedback-btn {
+            background: none;
+            border: 1px solid #d1d5db;
+            padding: 6px 14px;
+            border-radius: 14px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            color: #6b7280;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+
+        .feedback-btn:hover {
+            background: var(--tdsk-light-blue);
+            color: var(--tdsk-blue);
+            border-color: var(--tdsk-blue);
+        }
+
+        .feedback-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            background: #f9fafb;
+        }
+
+        /* Поле ввода */
+        .chat-input-container {
+            padding: 20px;
+            background: #fff;
+            border-top: 1px solid #f3f4f6;
+            display: flex;
+            gap: 12px;
+        }
+
+        #chat-input {
+            flex: 1;
+            padding: 14px 20px;
+            border: 1px solid #d1d5db;
+            border-radius: 24px;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.2s;
+            background-color: #f9fafb;
+        }
+
+        #chat-input:focus {
+            border-color: var(--tdsk-blue);
+            background-color: #ffffff;
+        }
+
+        #send-btn {
+            background-color: var(--tdsk-blue);
+            color: white;
+            border: none;
+            border-radius: 24px;
+            padding: 0 28px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.1s;
+        }
+
+        #send-btn:hover {
+            background-color: #085299;
+        }
+        
+        #send-btn:active {
+            transform: scale(0.98);
+        }
+        
+        .typing-indicator {
+            align-self: flex-start;
+            background: none;
+            border: none;
+            color: #9ca3af;
+            font-style: italic;
+            font-size: 0.9rem;
+            display: none;
+            padding-left: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="chat-container">
+    <div class="chat-header">
+        <span>Интеллектуальный помощник Termidesk</span>
+        <button class="reset-btn" id="reset-btn" title="Сбросить контекст диалога">Очистить диалог</button>
+    </div>
+    <div class="chat-messages" id="messages-container">
+        <!-- Приветственное сообщение -->
+        <div class="message message-bot">
+            Здравствуйте! Я — обученный ИИ техподдержки Termidesk VDI. Я могу решить большинство известных технических проблем или создать заявку на живого инженера.<br><br><b>Опишите вашу проблему.</b>
+        </div>
+        <div class="typing-indicator" id="typing-indicator">Бот думает...</div>
+    </div>
+    <div class="chat-input-container">
+        <input type="text" id="chat-input" placeholder="Например: Как обновить сессионный агент до версии 6.1?" autocomplete="off">
+        <button id="send-btn">Отправить</button>
+    </div>
+</div>
+
+<script>
+    const messagesContainer = document.getElementById('messages-container');
+    const chatInput = document.getElementById('chat-input');
+    const sendBtn = document.getElementById('send-btn');
+    const typingIndicator = document.getElementById('typing-indicator');
+
+    // Генерация уникального ID сессии (окна браузера)
+    const sessionId = Math.random().toString(36).substring(2, 10);
+    
+    // Подключение к WebSocket
+    const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const wsUrl = `${wsProtocol}//${window.location.host}/ws/chat`;
+    const socket = new WebSocket(wsUrl);
+
+    socket.onopen = () => {
+        console.log("WebSocket connected.");
+    };
+
+    socket.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        
+        if (data.type === 'typing') {
+            typingIndicator.textContent = data.status;
+            typingIndicator.style.display = 'block';
+            scrollToBottom();
+        } 
+        else if (data.type === 'message') {
+            typingIndicator.style.display = 'none';
+            renderBotMessage(data.content, data.message_id);
+        }
+    };
+
+    socket.onerror = (error) => {
+        console.error("Соединение потеряно:", error);
+        typingIndicator.textContent = "Ошибка соединения.";
+    };
+
+    // Плавная прокрутка в самый низ чата
+    function scrollToBottom() {
+        setTimeout(() => {
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }, 50);
+    }
+
+    function appendMessageElement(htmlContent, senderClass) {
+        const msgDiv = document.createElement('div');
+        msgDiv.className = `message ${senderClass}`;
+        msgDiv.innerHTML = htmlContent;
+        // Вставляем ДО индикатора печати
+        messagesContainer.insertBefore(msgDiv, typingIndicator);
+        scrollToBottom();
+        return msgDiv;
+    }
+
+    function renderBotMessage(markdownContent, messageId) {
+        // Рендерим Markdown
+        const htmlContent = marked.parse(markdownContent);
+        const msgDiv = appendMessageElement(htmlContent, 'message-bot');
+        
+        // Добавляем AJAX-кнопки фидбека если привязан messageId
+        if (messageId) {
+            const fbDiv = document.createElement('div');
+            fbDiv.className = 'feedback-actions';
+            
+            const btnLike = document.createElement('button');
+            btnLike.className = 'feedback-btn';
+            btnLike.innerHTML = '👍 Помогло';
+            btnLike.onclick = () => sendFeedback('like', messageId, fbDiv);
+            
+            const btnDislike = document.createElement('button');
+            btnDislike.className = 'feedback-btn';
+            btnDislike.innerHTML = '👎 Не помогло';
+            btnDislike.onclick = () => sendFeedback('dislike', messageId, fbDiv);
+            
+            fbDiv.appendChild(btnLike);
+            fbDiv.appendChild(btnDislike);
+            msgDiv.appendChild(fbDiv);
+        }
+    }
+
+    function sendFeedback(type, messageId, fbContainer) {
+        // Сразу блокируем кнопки и показываем сообщение для мгновенного отклика
+        const buttons = fbContainer.querySelectorAll('button');
+        buttons.forEach(btn => btn.disabled = true);
+        const thxMsg = document.createElement('span');
+        thxMsg.style.color = '#059669'; // Зеленый цвет успеха
+        thxMsg.style.fontSize = '0.85rem';
+        thxMsg.style.marginLeft = '10px';
+        thxMsg.style.fontWeight = '500';
+        thxMsg.textContent = 'Спасибо за ваш отзыв!';
+        fbContainer.appendChild(thxMsg);
+
+        // Асинхронно отправляем на бэкенд
+        fetch('/api/v1/feedback', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                message_id: messageId,
+                session_id: sessionId,
+                feedback: type
+            })
+        }).catch(err => console.error("Ошибка отправки фидбека:", err));
+    }
+
+    function sendMessage() {
+        const text = chatInput.value.trim();
+        if (!text) return;
+
+        // Отрисовка сообщения пользователя
+        appendMessageElement(text, 'message-user');
+        chatInput.value = '';
+        
+        typingIndicator.textContent = 'Отправка...';
+        typingIndicator.style.display = 'block';
+        scrollToBottom();
+
+        // Отправка через сокет
+        socket.send(JSON.stringify({ message: text }));
+    }
+
+    // Сброс контекста
+    document.getElementById('reset-btn').addEventListener('click', () => {
+        if (!confirm("Вы уверены, что хотите забыть историю переписки и начать заново?")) return;
+        
+        fetch('/api/v1/reset', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ session_id: sessionId })
+        }).then(res => res.json()).then(data => {
+            messagesContainer.innerHTML = '';
+            messagesContainer.appendChild(typingIndicator); // возвращаем индикатор
+            renderBotMessage("🔄 **Контекст диалога сброшен.** Я забыл всё, о чем мы говорили ранее. Можете задавать новый вопрос!", null);
+        }).catch(err => console.error("Ошибка сброса:", err));
+    });
+
+    sendBtn.addEventListener('click', sendMessage);
+    chatInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') sendMessage();
+    });
+</script>
+</body>
+</html>

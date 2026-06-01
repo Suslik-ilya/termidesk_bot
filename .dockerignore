@@ -1,0 +1,9 @@
+venv/
+.venv/
+__pycache__/
+*.pyc
+.git/
+data/
+artifacts/
+knowledge_base.zip
+_specs/

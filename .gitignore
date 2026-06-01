@@ -1,0 +1,52 @@
+# === Python ===
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+dist/
+build/
+*.egg
+
+# === Virtual Environment ===
+venv/
+.venv/
+env/
+
+# === IDE ===
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# === Environment & Secrets ===
+.env
+
+# === Data (большие PDF и индексы — не коммитим) ===
+data/pdfs/*
+!data/pdfs/.gitkeep
+data/whoosh_index/*
+!data/whoosh_index/.gitkeep
+data/qdrant/*
+!data/qdrant/.gitkeep
+data/processed_files.json
+knowledge_base.zip
+artifacts/
+
+# === Docker volumes & runtime ===
+docker-volumes/
+
+# === OS junk ===
+Thumbs.db
+.DS_Store
+
+# === Logs ===
+*.log
+
+# === Temp debug files ===
+_*.txt
+_check_*.py
+_specs/
+
+# === Модели ML (если будут скачиваться локально) ===
+models/
