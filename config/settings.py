@@ -4,7 +4,9 @@ from typing import Optional
 class Settings(BaseSettings):
     # LLM Settings
     llm_api_key: str = ""
-    proxy_api_url: str = "https://api.proxyapi.ru/google/v1"
+    proxy_api_url: str = "https://api.proxyapi.ru/openai/v1/chat/completions"
+    llm_main_model: str = "gpt-4o"
+    llm_router_model: str = "gpt-4o-mini"
     
     # Qdrant Settings
     qdrant_host: str = "localhost"

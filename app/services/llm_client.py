@@ -10,8 +10,8 @@ from app.services.metrics import llm_latency_seconds
 
 class LLMClient:
     def __init__(self):
-        # Использование эндпоинта ProxyAPI для доступа к OpenAI
-        self.base_url = "https://api.proxyapi.ru/openai/v1/chat/completions"
+        # Универсальный OpenAI-совместимый эндпоинт (настраивается в .env)
+        self.base_url = settings.proxy_api_url
         self.api_key = settings.llm_api_key
         self.headers = {
             "Authorization": f"Bearer {self.api_key}",
@@ -83,10 +83,10 @@ class LLMClient:
             raise
 
     async def call_router(self, system_prompt: str, user_message: str, schema: dict) -> dict:
-        return await self.structured_call("gpt-4o-mini", system_prompt, user_message, schema, node_name="router")
+        return await self.structured_call(settings.llm_router_model, system_prompt, user_message, schema, node_name="router")
 
     async def call_evaluator(self, system_prompt: str, user_message: str, schema: dict) -> dict:
-        return await self.structured_call("gpt-4o", system_prompt, user_message, schema, node_name="evaluator")
+        return await self.structured_call(settings.llm_main_model, system_prompt, user_message, schema, node_name="evaluator")
 
     async def call_generator(self, system_prompt: str, user_message: str, schema: dict) -> dict:
-        return await self.structured_call("gpt-4o", system_prompt, user_message, schema, node_name="generator")
+        return await self.structured_call(settings.llm_main_model, system_prompt, user_message, schema, node_name="generator")
